@@ -70,6 +70,8 @@
 
 		function button_handlers() {
 			$("#gold_mine_building").tooltip({
+				items: "#gold_mine_building",
+				track: true,
 				content: function() {
 					return "<div>Hello world</div>";
 				}
