@@ -74,7 +74,7 @@
 					name:"Gold Mine",
 					tooltip:"Extract gold from its earthly mantle to power your engine of pain.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:" g / second",
 					costs:[
 						['gold',50,1.4]
 					]
@@ -86,7 +86,7 @@
 					name:"Gold Tower",
 					tooltip:"A gold mine at the top of a tower, which makes it more powerful.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:" g / second",
 					costs:[
 						['gold',10000,3]
 					]
@@ -112,7 +112,7 @@
 					cps_prefix:"",
 					cps_suffix:" research / second",
 					costs:[
-						['gold',500,1.8]
+						['gold',500,1.2]
 					]
 				},
 				kung_fu_academy:{
@@ -125,7 +125,7 @@
 					cps_suffix:" dps",
 					costs:[
 						['gold',100,1.5],
-						['research',10,3]
+						['research',10,1.2]
 					]
 				},
 				power_armour:{
@@ -135,10 +135,10 @@
 					name:"Power Armour",
 					tooltip:"Harness U power to provide a combat strength multiplier.",
 					cps_prefix:"",
-					cps_suffix:"x combat multi",
+					cps_suffix:" combat multi",
 					costs:[
 						['gold',1000000,10],
-						['research',1000,5],
+						['research',1000,2],
 						['electricity',1,1]
 					]
 				}
@@ -263,7 +263,7 @@
 			update_counts:function() {
 
 				for (var id in this.buildings) {
-					$("#"+id+"_level").text(this.buildings[id].built);
+					$("#"+id+"_level").text(this.fn(this.buildings[id].built));
 				}
 
 			},
@@ -275,8 +275,14 @@
 				// step 1, cps/multi per building
 				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
 				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
-				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*10;
+				this.buildings.gold_tower["cps"]=this.buildings.gold_tower.built*40;
+				$("#gold_tower_cps").text(this.buildings.gold_tower.cps);
+
+				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*1;
 				$("#research_lab_cps").text(this.buildings.research_lab.cps);
+
+				this.buildings.kung_fu_academy["cps"]=this.buildings.kung_fu_academy.built*3;
+				$("#kung_fu_academy_cps").text(this.buildings.kung_fu_academy.cps);
 
 				// step 2, apply in order
 				var gold_cps=this.buildings.gold_mine.cps;
@@ -308,7 +314,8 @@
 
 				var pfx_str=parseFloat((nn[0] * Math.pow(10, +nn[1] - u * 3)).toFixed(3));
 
-				return pfx_str + ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'][u];
+				//return pfx_str + ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'][u];
+				return pfx_str + ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'KY', 'MY', 'GY', 'TY', 'PY', 'EY', 'ZY', 'YY', 'ZYY', 'MYY', 'GYY', 'TYY', 'PYY', 'EYY', 'ZYY', 'YYY', 'KYYY', 'MYYY'][u];
 			},
 
 			update_status:function() {
@@ -319,7 +326,7 @@
 					}
 
 					for (var i = this.resource_def[id].dom_cps.length - 1; i >= 0; i--) {
-						$(this.resource_def[id].dom_cps[i]).text(this.resource_gains[id]);
+						$(this.resource_def[id].dom_cps[i]).text(this.fn(this.resource_gains[id]));
 					}
 				}
 
