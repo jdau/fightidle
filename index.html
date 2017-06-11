@@ -76,7 +76,7 @@
 					cps_prefix:"",
 					cps_suffix:" g / second",
 					costs:[
-						['gold',50,1.4]
+						['gold',50,1.7]
 					]
 				},
 				gold_tower:{
@@ -294,7 +294,7 @@
 				// Explicit references to buildings allowed here
 
 				// step 1, cps/multi per building
-				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
+				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*500;
 				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
 				this.buildings.gold_tower["cps"]=this.buildings.gold_tower.built*40;
 				$("#gold_tower_cps").text(this.buildings.gold_tower.cps);
@@ -320,7 +320,7 @@
 					var b=this.buildings[id].built;
 					if (b==0) {b=1;}
 					for (var cost_id in this.buildings[id].costs) {
-						cout[this.buildings[id].costs[cost_id][0]]=(this.buildings[id].costs[cost_id][1]*b)+Math.pow((this.buildings[id].costs[cost_id][1]*this.buildings[id].built/2),this.buildings[id].costs[cost_id][2]);
+						cout[this.buildings[id].costs[cost_id][0]]=(this.buildings[id].costs[cost_id][1]*b)*this.buildings[id].costs[cost_id][2]*(b);
 					}
 
 					this.costs[id]=cout;
