@@ -79,8 +79,23 @@
 
 			dom:{},
 
+			gain_cache: {
+				g:0,
+				r:0
+			},
+
+			costs: {
+				gold_mine:0,
+				water_mill:0,
+				research_lab:0,
+				kungfu_academy:0,
+				power_armour:0
+			},
+
 			g:0,
 			r:0,
+
+			last_tick:0,
 
 			button_handlers:function () {
 				var dom={
@@ -123,20 +138,149 @@
 				this.dom=dom;
 
 				$(this.dom.button.gold_mine).click(function() {
-					console.log("click");
+					game.buy_building(1);
 				});
+
+				$(this.dom.button.water_mill).click(function() {
+					game.buy_building(2);
+				});
+
+				$(this.dom.button.research_lab).click(function() {
+					game.buy_building(3);
+				});
+
+				$(this.dom.button.kungfu_academy).click(function() {
+					game.buy_building(4);
+				});
+
+				$(this.dom.button.power_armour).click(function() {
+					game.buy_building(5);
+				});
+			},
+
+			buy_building:function(id) {
+
+				switch (id) {
+					case 1:
+						if (this.g >= this.costs.gold_mine) {
+							this.g -= this.costs.gold_mine;
+							this.build(1,1);
+						}
+						break;
+					case 2:
+						if (this.g >= this.costs.water_mill) {
+							this.g -= this.costs.water_mill;
+							this.build(2,1);
+						}
+						break;
+					case 3:
+						if (this.g >= this.costs.research_lab) {
+							this.g -= this.costs.research_lab;
+							this.build(3,1);
+						}
+						break;
+					case 4:
+						if (this.g >= this.costs.kungfu_academy) {
+							this.g -= this.costs.kungfu_academy;
+							this.build(4,1);
+						}
+						break;
+					case 5:
+						if (this.g >= this.costs.power_armour) {
+							this.g -= this.costs.power_armour;
+							this.build(5,1);
+						}
+						break;
+				}
+
+				this.update_costs();
+			},
+
+			build:function(id,number) {
+
+				switch (id) {
+					case 1:
+						this.buildings.gold_mine+=number;
+						break;
+					case 2:
+						this.buildings.water_mill+=number;
+						break;
+					case 3:
+						this.buildings.research_lab+=number;
+						break;
+					case 4:
+						this.buildings.kungfu_academy+=number;
+						break;
+					case 5:
+						this.buildings.power_armour+=number;
+						break;
+				}
+
+				this.update_counts();
+				this.update_gains();
+
+			},
+
+			update_counts:function() {
+
+				$(this.dom.levels.gold_mine).text(this.buildings.gold_mine);
+				$(this.dom.levels.water_mill).text(this.buildings.water_mill);
+				$(this.dom.levels.research_lab).text(this.buildings.research_lab);
+				$(this.dom.levels.kungfu_academy).text(this.buildings.kungfu_academy);
+				$(this.dom.levels.power_armour).text(this.buildings.power_armour);
+
 			},
 
 			update_gains:function() {
 
-				this.gain_cache.g=this.buildings.gold_mine*50;
+				this.gain_cache.g=this.buildings.gold_mine*5;
 				this.gain_cache.r=this.buildings.research_lab*10;
 
-			}
+				$(this.dom.effects.gold_mine).text(this.gain_cache.g);
+				$(this.dom.effects.water_mill).text(0);
+				$(this.dom.effects.research_lab).text(this.gain_cache.r);
+				$(this.dom.effects.kungfu_academy).text(0);
+				$(this.dom.effects.power_armour).text(0);
 
-			game_loop:function() {
 
 			},
+
+			update_costs:function() {
+
+				this.costs.gold_mine=Math.pow(this.buildings.gold_mine+1,2.5)+4;
+				this.costs.water_mill=Math.pow(this.buildings.water_mill+1,2.8)+10;
+				this.costs.research_lab=Math.pow(this.buildings.research_lab+1,2.85)+100;
+				this.costs.kungfu_academy=Math.pow(this.buildings.kungfu_academy+1,2.45)+50;
+				this.costs.power_armour=Math.pow(this.buildings.power_armour+1,3)+2000;
+
+				$(this.dom.costs.gold_mine).text(this.costs.gold_mine);
+				$(this.dom.costs.water_mill).text(this.costs.water_mill);
+				$(this.dom.costs.research_lab).text(this.costs.research_lab);
+				$(this.dom.costs.kungfu_academy).text(this.costs.kungfu_academy);
+				$(this.dom.costs.power_armour).text(this.costs.power_armour);
+			},
+
+			game_loop:function() {
+				// CALLED FROM WINDOW CONTEXT, use game instead of this
+
+				var diff=Date.now()-game.last_tick; // Time since last game_loop() call in ms
+				game.last_tick=Date.now(); // set last_tick now so no time is 'lost' to processing
+
+				game.g+=(game.gain_cache.g / 1000) * diff;
+				game.r+=(game.gain_cache.r / 1000) * diff;
+
+				// Update dom
+				$(game.dom.resources.gold).text(game.g);
+				$(game.dom.resources.research).text(game.r);
+
+				console.log(diff);
+
+				window.setTimeout(game.game_loop,1000); // the actual game_loop timeout can be adjusted freely
+			},
+
+			this.fn:function(number) {
+				return ();
+			}
 
 			init:function() {
 				this.button_handlers();
@@ -144,6 +288,7 @@
 				$(document).tooltip({
 					items: ".desc_tooltip",
 					track: true,
+					show: {delay: 1000},
 					content: function() {
 						return "<div>"+$(this).attr("tip")+"</div>";
 					}
@@ -151,6 +296,11 @@
 
 				// Game state
 				this.g=5;
+
+				this.last_tick=Date.now()-1000; // start one second ago, lol
+
+				this.update_costs();
+				this.game_loop();
 			}
 
 
