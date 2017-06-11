@@ -258,7 +258,7 @@
 				// Explicit references to buildings allowed here
 
 				// step 1, cps/multi per building
-				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*50;
+				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
 				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
 				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*10;
 				$("#research_lab_cps").text(this.buildings.research_lab.cps);
@@ -283,6 +283,7 @@
 
 					this.costs[id]=cout;
 					$("#"+id+"_nextcost").text(this.cost_string(id));
+					var foo=" AIzaSyBOhaeYNDutGh5nsajWdNf_uhIVk1ENob0 ";
 				}
 
 			},
@@ -396,6 +397,9 @@
 				</div>
 				<div class="two columns">
 					<span>Electricity:</span>&nbsp;<span id="electricity_current">0</span>&nbsp;/&nbsp;<span id="electricity_max">0</span>
+				</div>
+				<div class="two columns">
+					<span>DPS:</span>&nbsp;<span id="dps_display">0</span>
 				</div>
 			</div>
 		</div>
