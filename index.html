@@ -76,7 +76,7 @@
 					cps_prefix:"",
 					cps_suffix:"g / second",
 					costs:[
-						['gold',50,1.13]
+						['gold',50,1.4]
 					]
 				},
 				water_mill:{
@@ -258,8 +258,10 @@
 				// Explicit references to buildings allowed here
 
 				// step 1, cps/multi per building
-				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
+				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*50;
+				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
 				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*10;
+				$("#research_lab_cps").text(this.buildings.research_lab.cps);
 
 				// step 2, apply in order
 				var gold_cps=this.buildings.gold_mine.cps;
@@ -285,11 +287,20 @@
 
 			},
 
+			fn:function(n) {
+				var nn = n.toExponential(3).split(/e/);
+				var u = Math.floor(+nn[1] / 3);
+
+				var pfx_str=parseFloat((nn[0] * Math.pow(10, +nn[1] - u * 3)).toFixed(3));
+
+				return pfx_str + ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'][u];
+			},
+
 			update_status:function() {
 				for (var id in this.resource_def) {
 
 					for (var i = this.resource_def[id].dom.length - 1; i >= 0; i--) {
-						$(this.resource_def[id].dom[i]).text(this.resources[id]);
+						$(this.resource_def[id].dom[i]).text(this.fn(this.resources[id]));
 					}
 
 					for (var i = this.resource_def[id].dom_cps.length - 1; i >= 0; i--) {
@@ -304,9 +315,9 @@
 				var out="";
 				for (var cost_id in this.buildings[id].costs) {
 					if (out=="") {
-						out=this.buildings[id].costs[cost_id][0]+" "+this.costs[id][this.buildings[id].costs[cost_id][0]]+", ";
+						out=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
 					} else {
-						out+=this.buildings[id].costs[cost_id][0]+" "+this.costs[id][this.buildings[id].costs[cost_id][0]]+", ";
+						out=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
 					}
 				}
 
@@ -326,7 +337,7 @@
 
 				game.update_status();
 
-				window.setTimeout(game.game_loop,1000); // the actual game_loop timeout can be adjusted freely
+				window.setTimeout(game.game_loop,820); // the actual game_loop timeout can be adjusted freely
 			},
 
 			init:function() {
