@@ -61,203 +61,257 @@
 	<script>
 
 		$( function() {
-			$( "#building_tabs" ).tabs();
-			$( "#status_tabs" ).tabs();
-
 			game.init();
 		} );
 
 		var game = {
 
 			buildings:{
-				gold_mine:0,
-				water_mill:0,
-				research_lab:0,
-				kungfu_academy:0,
-				power_armour:0
+				gold_mine:{
+					id:1,
+					built:0,
+					category:"economic",
+					name:"Gold Mine",
+					tooltip:"Extract gold from its earthly mantle to power your engine of pain.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',50,1.13]
+					]
+				},
+				water_mill:{
+					id:2,
+					built:0,
+					category:"economic",
+					name:"Water Mill",
+					tooltip:"Generate electricity with the latest technologies.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',50,1.2]
+					]
+				},
+				research_lab:{
+					id:3,
+					built:0,
+					category:"research",
+					name:"Research Lab",
+					tooltip:"These buildings find things out for you.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',50,1.3]
+					]
+				},
+				kung_fu_academy:{
+					id:4,
+					built:0,
+					category:"combat",
+					name:"Kung-Fu Academy",
+					tooltip:"Punch and kick better with more academies.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',50,1.4]
+					]
+				},
+				power_armour:{
+					id:5,
+					built:0,
+					category:"combat",
+					name:"Power Armour",
+					tooltip:"Harness U power to provide a combat strength multiplier.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',50,1.7]
+					]
+				}
 			},
 
-			dom:{},
-
-			gain_cache: {
-				g:0,
-				r:0
+			resource_def: {
+				gold:{
+					name:"Gold",
+					tooltip:"Delicious gold",
+					utype:"quantity",
+					dom:[],
+					dom_cps:[],
+					statusbar:true
+				},
+				research:{
+					name:"Research",
+					tooltip:"How to kung fu and build power armour mostly",
+					utype:"quantity",
+					dom:[],
+					dom_cps:[],
+					statusbar:true
+				},
+				electricity:{
+					name:"Electricity",
+					tooltip:"One unit is around 1.4PW",
+					utype:"limit",
+					dom:[],
+					dom_cps:[],
+					statusbar:true
+				}
 			},
 
-			costs: {
-				gold_mine:0,
-				water_mill:0,
-				research_lab:0,
-				kungfu_academy:0,
-				power_armour:0
-			},
-
-			g:0,
-			r:0,
+			costs: {},
+			resources: {},
+			resource_gains: {},
 
 			last_tick:0,
 
-			button_handlers:function () {
-				var dom={
-					button:{
-						gold_mine:$("#gold_mine_building"),
-						water_mill:$("#water_mill_building"),
-						research_lab:$("#research_lab_building"),
-						kungfu_academy:$("#kung_fu_academy_building"),
-						power_armour:$("#power_armour_building")
-					},
-					levels:{
-						gold_mine:$("#gold_mine_level"),
-						water_mill:$("#water_mill_level"),
-						research_lab:$("#research_lab_level"),
-						kungfu_academy:$("#kung_fu_academy_level"),
-						power_armour:$("#power_armour_level")
-					},
-					costs:{
-						gold_mine:$("#gold_mine_nextcost"),
-						water_mill:$("#water_mill_nextcost"),
-						research_lab:$("#research_lab_nextcost"),
-						kungfu_academy:$("#kung_fu_academy_nextcost"),
-						power_armour:$("#power_armour_nextcost")
-					},
-					effects:{
-						gold_mine:$("#gold_per_second"),
-						water_mill:$("#elec_limit"),
-						research_lab:$("#research_per_second"),
-						kungfu_academy:$("#damage_per_second"),
-						power_armour:$("#pa_multi")
-					},
-					resources:{
-						gold:$("#gold_display"),
-						research:$("#research_display"),
-						elec_current:$("#elec_current"),
-						elec_limit:$("#elec_limit")
+			create_buttons: function() {
+				for (var id in this.buildings) {
+
+					var target="#economy_tab";
+					if (this.buildings[id].category=="research") {
+						target="#research_tab";
+					} else if (this.buildings[id].category=="combat") {
+						target="#combat_tab";
 					}
-				};
 
-				this.dom=dom;
+					$(target).append('<li>'+
+						'<button id="'+id+'_building" nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.buildings[id].tooltip+'">'+
+							'<strong>'+this.buildings[id].name+'</strong><br />'+
+							'Level <span id="'+id+'_level">0</span><br />'+
+							this.buildings[id].cps_prefix+'<span id="'+id+'_cps">0</span>'+this.buildings[id].cps_suffix+'<br />'+
+							'<span id="'+id+'_nextcost">0</span>'+
+						'</button>'+
+					'</li>');					
+				}
+			},
 
-				$(this.dom.button.gold_mine).click(function() {
-					game.buy_building(1);
-				});
+			button_handlers:function () {
+				for (var id in this.buildings) {
+					$("#"+id+"_building").click(function() {
+						game.buy_building($(this).attr("nid"));
+					});					
+				}
+			},
 
-				$(this.dom.button.water_mill).click(function() {
-					game.buy_building(2);
-				});
+			resource_init:function() {
+				for (var id in this.resource_def) {
+					// init quantity storage
+					this.resources[id]=0;
+					this.resource_gains[id]=0;
 
-				$(this.dom.button.research_lab).click(function() {
-					game.buy_building(3);
-				});
-
-				$(this.dom.button.kungfu_academy).click(function() {
-					game.buy_building(4);
-				});
-
-				$(this.dom.button.power_armour).click(function() {
-					game.buy_building(5);
-				});
+					// init with status bar ids
+					if (this.resource_def[id].statusbar) {
+						if (this.resource_def[id].utype=="quantity") {
+							this.resource_def[id].dom=['#'+id+'_display'];
+							this.resource_def[id].dom_cps=[];
+						} else if (this.resource_def[id].utype=="limit") {
+							this.resource_def[id].dom=['#'+id+'_max'];
+							this.resource_def[id].dom_cps=['#'+id+'_current'];
+						}	
+					}
+				}
 			},
 
 			buy_building:function(id) {
 
-				switch (id) {
-					case 1:
-						if (this.g >= this.costs.gold_mine) {
-							this.g -= this.costs.gold_mine;
-							this.build(1,1);
-						}
-						break;
-					case 2:
-						if (this.g >= this.costs.water_mill) {
-							this.g -= this.costs.water_mill;
-							this.build(2,1);
-						}
-						break;
-					case 3:
-						if (this.g >= this.costs.research_lab) {
-							this.g -= this.costs.research_lab;
-							this.build(3,1);
-						}
-						break;
-					case 4:
-						if (this.g >= this.costs.kungfu_academy) {
-							this.g -= this.costs.kungfu_academy;
-							this.build(4,1);
-						}
-						break;
-					case 5:
-						if (this.g >= this.costs.power_armour) {
-							this.g -= this.costs.power_armour;
-							this.build(5,1);
-						}
-						break;
+				if (this.do_costs(id,true)) {
+
+					this.buildings[id].built+=1;
+
+					this.update_counts();
+					this.update_gains();
+					this.update_costs();
 				}
 
-				this.update_costs();
+				
 			},
 
-			build:function(id,number) {
+			do_costs:function(id,commit) {
+				
+				var costs=this.costs[id];
 
-				switch (id) {
-					case 1:
-						this.buildings.gold_mine+=number;
-						break;
-					case 2:
-						this.buildings.water_mill+=number;
-						break;
-					case 3:
-						this.buildings.research_lab+=number;
-						break;
-					case 4:
-						this.buildings.kungfu_academy+=number;
-						break;
-					case 5:
-						this.buildings.power_armour+=number;
-						break;
+				var check=true;
+				for (var k in costs) {
+					if ( this.resources[k] < costs[k] ) {
+						check=false;
+					}
 				}
 
-				this.update_counts();
-				this.update_gains();
+				if (!commit || !check) { return check; }
+
+				for (var k in costs) {
+					this.resources[k] -= costs[k];
+				}
+
+				return true;
 
 			},
 
 			update_counts:function() {
 
-				$(this.dom.levels.gold_mine).text(this.buildings.gold_mine);
-				$(this.dom.levels.water_mill).text(this.buildings.water_mill);
-				$(this.dom.levels.research_lab).text(this.buildings.research_lab);
-				$(this.dom.levels.kungfu_academy).text(this.buildings.kungfu_academy);
-				$(this.dom.levels.power_armour).text(this.buildings.power_armour);
+				for (var id in this.buildings) {
+					$("#"+id+"_level").text(this.buildings[id].built);
+				}
 
 			},
 
 			update_gains:function() {
 
-				this.gain_cache.g=this.buildings.gold_mine*5;
-				this.gain_cache.r=this.buildings.research_lab*10;
+				// Explicit references to buildings allowed here
 
-				$(this.dom.effects.gold_mine).text(this.gain_cache.g);
-				$(this.dom.effects.water_mill).text(0);
-				$(this.dom.effects.research_lab).text(this.gain_cache.r);
-				$(this.dom.effects.kungfu_academy).text(0);
-				$(this.dom.effects.power_armour).text(0);
+				// step 1, cps/multi per building
+				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
+				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*10;
 
+				// step 2, apply in order
+				var gold_cps=this.buildings.gold_mine.cps;
+				this.resource_gains.gold=gold_cps;
 
+				var resource_cps=this.buildings.research_lab.cps;
+				this.resource_gains.research=resource_cps;
 			},
 
 			update_costs:function() {
 
-				this.costs.gold_mine=Math.pow(this.buildings.gold_mine+1,2.5)+4;
-				this.costs.water_mill=Math.pow(this.buildings.water_mill+1,2.8)+10;
-				this.costs.research_lab=Math.pow(this.buildings.research_lab+1,2.85)+100;
-				this.costs.kungfu_academy=Math.pow(this.buildings.kungfu_academy+1,2.45)+50;
-				this.costs.power_armour=Math.pow(this.buildings.power_armour+1,3)+2000;
+				for (var id in this.buildings) {
+					var cout={};
+					var b=this.buildings[id].built;
+					if (b==0) {b=1;}
+					for (var cost_id in this.buildings[id].costs) {
+						cout[this.buildings[id].costs[cost_id][0]]=(this.buildings[id].costs[cost_id][1]*b)+Math.pow((this.buildings[id].costs[cost_id][1]*this.buildings[id].built/2),this.buildings[id].costs[cost_id][2]);
+					}
 
-				$(this.dom.costs.gold_mine).text(this.costs.gold_mine);
-				$(this.dom.costs.water_mill).text(this.costs.water_mill);
-				$(this.dom.costs.research_lab).text(this.costs.research_lab);
-				$(this.dom.costs.kungfu_academy).text(this.costs.kungfu_academy);
-				$(this.dom.costs.power_armour).text(this.costs.power_armour);
+					this.costs[id]=cout;
+					$("#"+id+"_nextcost").text(this.cost_string(id));
+				}
+
+			},
+
+			update_status:function() {
+				for (var id in this.resource_def) {
+
+					for (var i = this.resource_def[id].dom.length - 1; i >= 0; i--) {
+						$(this.resource_def[id].dom[i]).text(this.resources[id]);
+					}
+
+					for (var i = this.resource_def[id].dom_cps.length - 1; i >= 0; i--) {
+						$(this.resource_def[id].dom_cps[i]).text(this.resource_gains[id]);
+					}
+				}
+
+			},
+
+			cost_string:function(id) {
+
+				var out="";
+				for (var cost_id in this.buildings[id].costs) {
+					if (out=="") {
+						out=this.buildings[id].costs[cost_id][0]+" "+this.costs[id][this.buildings[id].costs[cost_id][0]]+", ";
+					} else {
+						out+=this.buildings[id].costs[cost_id][0]+" "+this.costs[id][this.buildings[id].costs[cost_id][0]]+", ";
+					}
+				}
+
+				return out.slice(0,-2);
+
 			},
 
 			game_loop:function() {
@@ -266,24 +320,22 @@
 				var diff=Date.now()-game.last_tick; // Time since last game_loop() call in ms
 				game.last_tick=Date.now(); // set last_tick now so no time is 'lost' to processing
 
-				game.g+=(game.gain_cache.g / 1000) * diff;
-				game.r+=(game.gain_cache.r / 1000) * diff;
+				for (var id in game.resource_gains) {
+					game.resources[id]+=((game.resource_gains[id] / 1000) * diff);
+				}
 
-				// Update dom
-				$(game.dom.resources.gold).text(game.g);
-				$(game.dom.resources.research).text(game.r);
-
-				console.log(diff);
+				game.update_status();
 
 				window.setTimeout(game.game_loop,1000); // the actual game_loop timeout can be adjusted freely
 			},
 
-			this.fn:function(number) {
-				return ();
-			}
-
 			init:function() {
-				this.button_handlers();
+				// Library stuff
+				$( "#building_tabs" ).tabs({
+
+				});
+
+				$( "#status_tabs" ).tabs();
 
 				$(document).tooltip({
 					items: ".desc_tooltip",
@@ -294,11 +346,17 @@
 					}
 				});
 
-				// Game state
-				this.g=5;
+				// Game init
+				this.resource_init();
+				this.create_buttons();
+				this.button_handlers();
 
+				// Game initial state
+				this.resources.gold=50;
 				this.last_tick=Date.now()-1000; // start one second ago, lol
 
+				this.update_counts();
+				this.update_gains();
 				this.update_costs();
 				this.game_loop();
 			}
@@ -326,7 +384,7 @@
 					<span>Research:</span>&nbsp;<span id="research_display">0</span>
 				</div>
 				<div class="two columns">
-					<span>Electricity:</span>&nbsp;<span id="elec_current">0</span>&nbsp;/&nbsp;<span id="elec_limit">0</span>
+					<span>Electricity:</span>&nbsp;<span id="electricity_current">0</span>&nbsp;/&nbsp;<span id="electricity_max">0</span>
 				</div>
 			</div>
 		</div>
@@ -344,59 +402,16 @@
 						<li><a href="#building_tabs-2">Research</a></li>
 						<li><a href="#building_tabs-3">Combat</a></li>
 					</ul>
-					<div id="building_tabs-1">
-						<ul class="building_buttons">
-							<li>
-								<button id="gold_mine_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Extract gold from its earthly mantle to power your engine of pain.">
-									<strong>Gold Mine</strong><br />
-									Level <span id="gold_mine_level">0</span><br />
-									<span id="gold_per_second">0</span>g / second<br />
-									$<span id="gold_mine_nextcost">0</span>
-								</button>
-							</li>
-							<li>
-								<button id="water_mill_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Use the latest technologies to generate energy.">
-									<strong>Water Mill</strong><br />
-									Level <span id="water_mill_level">0</span><br />
-									<span id="elec_limit">0</span> electricity<br />
-									$<span id="water_mill_nextcost">0</span>
-								</button>
-							</li>
-						</ul>
+					<div id="building_tabs-1" data="economy">
+						<ul class="building_buttons" id="economy_tab"></ul>
 						&nbsp;
 					</div>
-					<div id="building_tabs-2">
-						<ul class="building_buttons">
-							<li>
-								<button id="research_lab_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Find things out, then later decide what you found out.">
-									<strong>Research Lab</strong><br />
-									Level <span id="research_lab_level">0</span><br />
-									<span id="research_per_second">0</span> / second<br />
-									$<span id="research_lab_nextcost">0</span>
-								</button>
-							</li>
-						</ul>
+					<div id="building_tabs-2" data="research">
+						<ul class="building_buttons" id="research_tab"></ul>
 						&nbsp;
 					</div>
-					<div id="building_tabs-3">
-						<ul class="building_buttons">
-							<li>
-								<button id="kung_fu_academy_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Learn how to punch and kick.">
-									<strong>Kung Fu Academy</strong><br />
-									Level <span id="kung_fu_academy_level">0</span><br />
-									<span id="damage_per_second">0</span> dps<br />
-									$<span id="kung_fu_academy_nextcost">0</span>
-								</button>
-							</li>
-							<li>
-								<button id="power_armour_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="The U makes it so strong that it provides a dps multiplier.">
-									<strong>Power Armour</strong><br />
-									Level <span id="power_armour_level">0</span><br />
-									<span id="pa_multi">0</span>x multiplier<br />
-									$<span id="power_armour_nextcost">0</span>
-								</button>
-							</li>
-						</ul>
+					<div id="building_tabs-3" data="combat">
+						<ul class="building_buttons" id="combat_tab"></ul>
 						&nbsp;
 					</div>
 				</div>
