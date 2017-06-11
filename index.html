@@ -29,7 +29,7 @@
 			background-color: #223;
 			color:#eef;
 			height:100px;
-			width:100px;
+			width:300px;
 			padding: 0;
 			margin: 0;
 			text-align: center;
@@ -49,6 +49,10 @@
 		#building_tabs ul {
 			list-style: none;
 		}
+
+		.building_buttons li button {
+			margin-bottom:10px;
+		}
 	</style>
 
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -56,28 +60,42 @@
 
 	<script>
 
-		var buildings={
-			"gold_mine":0,
-			"research_lab":0,
-			"kungfu_academy":0
-		}
 		$( function() {
 			$( "#building_tabs" ).tabs();
 			$( "#status_tabs" ).tabs();
 
-			button_handlers();
+			game.button_handlers();
 		} );
 
-		function button_handlers() {
-			$("#gold_mine_building").tooltip({
-				items: "#gold_mine_building",
-				track: true,
-				content: function() {
-					return "<div>Hello world</div>";
-				}
-			});
+		var game = {
 
-		}
+			buildings:{
+				"gold_mine":0,
+				"water_mill":0,
+				"research_lab":0,
+				"kungfu_academy":0,
+				"power_armour":0
+			},
+
+
+
+			button_handlers:function () {
+
+				$(document).tooltip({
+					items: ".desc_tooltip",
+					track: true,
+					content: function() {
+						return "<div>"+$(this).attr("tip")+"</div>";
+					}
+				});
+
+			}
+
+
+
+		};
+
+		
 	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png">
@@ -115,22 +133,56 @@
 						<li><a href="#building_tabs-3">Combat</a></li>
 					</ul>
 					<div id="building_tabs-1">
-						<ul>
+						<ul class="building_buttons">
 							<li>
-								<button id="gold_mine_building" class="ui-button ui-widget ui-corner-all">
-									Gold Mine <br />
-									Level <span id="gold_mine_level">0</span> <br />
-									<span id="gold_per_second">0</span>g / second
+								<button id="gold_mine_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Extract gold from its earthly mantle to power your engine of pain.">
+									<strong>Gold Mine</strong><br />
+									Level <span id="gold_mine_level">0</span><br />
+									<span id="gold_per_second">0</span>g / second<br />
+									$<span id="gold_mine_nextcost">0</span>
+								</button>
+							</li>
+							<li>
+								<button id="water_mill_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Use the latest technologies to generate energy.">
+									<strong>Water Mill</strong><br />
+									Level <span id="water_mill_level">0</span><br />
+									<span id="elec_limit">0</span> electricity<br />
+									$<span id="water_mill_nextcost">0</span>
 								</button>
 							</li>
 						</ul>
 					</div>
 					<div id="building_tabs-2">
-						<p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+						<ul class="building_buttons">
+							<li>
+								<button id="research_lab_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Find things out, then later decide what you found out.">
+									<strong>Research Lab</strong><br />
+									Level <span id="research_lab_level">0</span><br />
+									<span id="research_per_second">0</span> / second<br />
+									$<span id="research_lab_nextcost">0</span>
+								</button>
+							</li>
+						</ul>
 					</div>
 					<div id="building_tabs-3">
-						<p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
-						<p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
+						<ul class="building_buttons">
+							<li>
+								<button id="kung_fu_academy_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Learn how to punch and kick.">
+									<strong>Kung Fu Academy</strong><br />
+									Level <span id="kung_fu_academy_level">0</span><br />
+									<span id="damage">0</span> dps<br />
+									$<span id="kung_fu_academy_nextcost">0</span>
+								</button>
+							</li>
+							<li>
+								<button id="power_armour_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="The U makes it so strong that it provides a dps multiplier.">
+									<strong>Power Armour</strong><br />
+									Level <span id="power_armour_level">0</span><br />
+									<span id="pa_multi">0</span>x multiplier<br />
+									$<span id="power_armour_nextcost">0</span>
+								</button>
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
