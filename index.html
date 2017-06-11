@@ -79,6 +79,18 @@
 						['gold',50,1.4]
 					]
 				},
+				gold_tower:{
+					id:6,
+					built:0,
+					category:"economic",
+					name:"Gold Tower",
+					tooltip:"A gold mine at the top of a tower, which makes it more powerful.",
+					cps_prefix:"",
+					cps_suffix:"g / second",
+					costs:[
+						['gold',10000,3]
+					]
+				},
 				water_mill:{
 					id:2,
 					built:0,
@@ -86,9 +98,9 @@
 					name:"Water Mill",
 					tooltip:"Generate electricity with the latest technologies.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:" electricity",
 					costs:[
-						['gold',50,1.2]
+						['gold',500,4]
 					]
 				},
 				research_lab:{
@@ -98,9 +110,9 @@
 					name:"Research Lab",
 					tooltip:"These buildings find things out for you.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:" research / second",
 					costs:[
-						['gold',50,1.3]
+						['gold',500,1.8]
 					]
 				},
 				kung_fu_academy:{
@@ -110,9 +122,10 @@
 					name:"Kung-Fu Academy",
 					tooltip:"Punch and kick better with more academies.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:" dps",
 					costs:[
-						['gold',50,1.4]
+						['gold',100,1.5],
+						['research',10,3]
 					]
 				},
 				power_armour:{
@@ -122,9 +135,11 @@
 					name:"Power Armour",
 					tooltip:"Harness U power to provide a combat strength multiplier.",
 					cps_prefix:"",
-					cps_suffix:"g / second",
+					cps_suffix:"x combat multi",
 					costs:[
-						['gold',50,1.7]
+						['gold',1000000,10],
+						['research',1000,5],
+						['electricity',1,1]
 					]
 				}
 			},
@@ -283,7 +298,6 @@
 
 					this.costs[id]=cout;
 					$("#"+id+"_nextcost").text(this.cost_string(id));
-					var foo=" AIzaSyBOhaeYNDutGh5nsajWdNf_uhIVk1ENob0 ";
 				}
 
 			},
@@ -318,7 +332,7 @@
 					if (out=="") {
 						out=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
 					} else {
-						out=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
+						out+=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
 					}
 				}
 
@@ -436,19 +450,14 @@
 
 				<div id="status_tabs">
 					<ul>
-						<li><a href="#status_tabs-1">Nunc tincidunt</a></li>
-						<li><a href="#status_tabs-2">Proin dolor</a></li>
-						<li><a href="#status_tabs-3">Aenean lacinia</a></li>
+						<li><a href="#status_tabs-1">Upgrades</a></li>
+						<li><a href="#status_tabs-2">Status</a></li>
 					</ul>
 					<div id="status_tabs-1">
 						<p>Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu. Donec sollicitudin mi sit amet mauris. Nam elementum quam ullamcorper ante. Etiam aliquet massa et lorem. Mauris dapibus lacus auctor risus. Aenean tempor ullamcorper leo. Vivamus sed magna quis ligula eleifend adipiscing. Duis orci. Aliquam sodales tortor vitae ipsum. Aliquam nulla. Duis aliquam molestie erat. Ut et mauris vel pede varius sollicitudin. Sed ut dolor nec orci tincidunt interdum. Phasellus ipsum. Nunc tristique tempus lectus.</p>
 					</div>
 					<div id="status_tabs-2">
 						<p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
-					</div>
-					<div id="status_tabs-3">
-						<p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
-						<p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
 					</div>
 				</div>
 			</div>
