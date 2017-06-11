@@ -42,8 +42,8 @@
 		}
 
 		.ui-button:focus {
-			background-color: #000;
-			color:#ddf;
+			background-color: #226;
+			color: #aaa;
 		}
 
 		#building_tabs ul {
@@ -64,7 +64,7 @@
 			$( "#building_tabs" ).tabs();
 			$( "#status_tabs" ).tabs();
 
-			game.button_handlers();
+			game.init();
 		} );
 
 		var game = {
@@ -77,9 +77,55 @@
 				"power_armour":0
 			},
 
-
+			dom:{},
 
 			button_handlers:function () {
+				var dom={
+					button:{
+						gold_mine:$("#gold_mine_building"),
+						water_mill:$("#water_mill_building"),
+						research_lab:$("#research_lab_building"),
+						kungfu_academy:$("#kung_fu_academy_building"),
+						power_armour:$("#power_armour_building")
+					},
+					levels:{
+						gold_mine:$("#gold_mine_level"),
+						water_mill:$("#water_mill_level"),
+						research_lab:$("#research_lab_level"),
+						kungfu_academy:$("#kung_fu_academy_level"),
+						power_armour:$("#power_armour_level")
+					},
+					costs:{
+						gold_mine:$("#gold_mine_nextcost"),
+						water_mill:$("#water_mill_nextcost"),
+						research_lab:$("#research_lab_nextcost"),
+						kungfu_academy:$("#kung_fu_academy_nextcost"),
+						power_armour:$("#power_armour_nextcost")
+					},
+					effects:{
+						gold_mine:$("#gold_per_second"),
+						water_mill:$("#elec_limit"),
+						research_lab:$("#research_per_second"),
+						kungfu_academy:$("#damage_per_second"),
+						power_armour:$("#pa_multi")
+					},
+					resources:{
+						gold:$("#gold_display"),
+						research:$("#research_display"),
+						elec_current:$("#elec_current"),
+						elec_limit:$("#elec_limit")
+					}
+				};
+
+				this.dom=dom;
+
+				$(this.dom.button.gold_mine).click(function() {
+					console.log("click");
+				});
+			},
+
+			init:function() {
+				this.button_handlers();
 
 				$(document).tooltip({
 					items: ".desc_tooltip",
@@ -88,7 +134,6 @@
 						return "<div>"+$(this).attr("tip")+"</div>";
 					}
 				});
-
 			}
 
 
@@ -151,6 +196,7 @@
 								</button>
 							</li>
 						</ul>
+						&nbsp;
 					</div>
 					<div id="building_tabs-2">
 						<ul class="building_buttons">
@@ -163,6 +209,7 @@
 								</button>
 							</li>
 						</ul>
+						&nbsp;
 					</div>
 					<div id="building_tabs-3">
 						<ul class="building_buttons">
@@ -170,7 +217,7 @@
 								<button id="kung_fu_academy_building" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="Learn how to punch and kick.">
 									<strong>Kung Fu Academy</strong><br />
 									Level <span id="kung_fu_academy_level">0</span><br />
-									<span id="damage">0</span> dps<br />
+									<span id="damage_per_second">0</span> dps<br />
 									$<span id="kung_fu_academy_nextcost">0</span>
 								</button>
 							</li>
@@ -183,6 +230,7 @@
 								</button>
 							</li>
 						</ul>
+						&nbsp;
 					</div>
 				</div>
 			</div>
