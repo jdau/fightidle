@@ -36,6 +36,15 @@
 			letter-spacing: normal;
 		}
 
+		.ui-button:disabled {
+			color: #000;
+		}
+
+		.ui-button:disabled:hover {
+			background-color: #226;
+			color: #000;
+		}
+
 		.ui-button:hover {
 			background-color: #226;
 			color: #888;
@@ -152,7 +161,7 @@
 					cps_suffix:" dps",
 					costs:[
 						['gold',500,3.5],
-						['research',20,3]
+						['research',200,4]
 					]
 				},
 				power_armour:{
@@ -211,12 +220,54 @@
 					name:"Mining",
 					tooltip:"mining",
 					link:"gold_mine",
-					start_level:5,
-					level_multi:2
-				}
+					start_level:10,
+					increment:10,
+					current_level:0,
+					costs:[
+						['gold',500,3.5],
+						['research',20,3]
+					]
+				},
+				towering:{
+					name:"Towering",
+					tooltip:"mining",
+					link:"gold_tower",
+					start_level:10,
+					increment:10,
+					current_level:0,
+					costs:[
+						['gold',500,3.5],
+						['research',20,3]
+					]
+				},
+				research:{
+					name:"Research",
+					tooltip:"mining",
+					link:"research_lab",
+					start_level:10,
+					increment:10,
+					current_level:0,
+					costs:[
+						['gold',500,3.5],
+						['research',20,3]
+					]
+				},
+				kungfu:{
+					name:"Martial Arts",
+					tooltip:"mining",
+					link:"kung_fu_academy",
+					start_level:10,
+					increment:10,
+					current_level:0,
+					costs:[
+						['gold',500,3.5],
+						['research',20,3]
+					]
+				},
 			},
 
 			costs: {},
+			upgrade_costs: {},
 			resources: {},
 			resource_gains: {},
 
@@ -238,11 +289,11 @@
 				if (boss) {
 					this.current_enemy.name=this.enemy_prefixes[Math.floor(Math.random() * this.enemy_prefixes.length)] + " " + this.boss_nouns[Math.floor(Math.random() * this.boss_nouns.length)] + " the " + this.enemy_prefixes[Math.floor(Math.random() * this.enemy_prefixes.length)];
 
-					this.current_enemy.hp_max=(power_level*power_level*2)+500;
+					this.current_enemy.hp_max=(power_level*power_level*3)+(250*power_level*0.5);
 				} else { 
 					this.current_enemy.name=this.enemy_prefixes[Math.floor(Math.random() * this.enemy_prefixes.length)] + " " + this.enemy_nouns[Math.floor(Math.random() * this.enemy_nouns.length)];
 
-					this.current_enemy.hp_max=(power_level*power_level*1.5)+500;
+					this.current_enemy.hp_max=(power_level*power_level*1.5)+(250*power_level*0.5);
 				}
 
 				this.current_enemy.hp=this.current_enemy.hp_max;
@@ -278,7 +329,7 @@
 						'<button id="'+id+'_building" nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.buildings[id].tooltip+'">'+
 							'<strong>'+this.buildings[id].name+'</strong><br />'+
 							'Level <span id="'+id+'_level">0</span><br />'+
-							this.buildings[id].cps_prefix+'<span id="'+id+'_cps">0</span>'+this.buildings[id].cps_suffix+'<br />'+
+							this.buildings[id].cps_prefix+'<span id="'+id+'_cps">0</span>'+this.buildings[id].cps_suffix+' (<span id="'+id+'_cps_post">0</span>)<br />'+
 							'<span id="'+id+'_nextcost">0</span>'+
 						'</button>'+
 					'</li>');					
@@ -286,7 +337,7 @@
 
 				for (var id in this.upgrade_def) {
 					$("#upgrade_tab").append('<li>'+
-						'<button id="'+id+'_upgrade" nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.upgrade_def[id].tooltip+'">'+
+						'<button id="'+id+'_upgrade" disabled nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.upgrade_def[id].tooltip+'">'+
 							'<strong>'+this.upgrade_def[id].name+'</strong><br />'+
 							'Level <span id="'+id+'_upgrade_level">0</span><br />'+
 							'<span id="'+id+'_multi">0</span> multi<br />'+
@@ -300,7 +351,39 @@
 				for (var id in this.buildings) {
 					$("#"+id+"_building").click(function() {
 						game.buy_building($(this).attr("nid"));
-					});					
+					});
+				}
+
+				for (var id in this.upgrade_def) {
+					$("#"+id+"_upgrade").click(function() {
+						game.do_upgrade($(this).attr("nid"));
+					});
+				}				
+			},
+
+			do_upgrade:function(id) {
+				console.log(id);
+
+				if (this.do_costs(this.upgrade_costs[id],true)) {
+
+					this.upgrade_def[id].current_level+=1;
+
+					this.update_upgrades();
+					this.update_counts();
+					this.update_gains();
+					this.update_costs();
+				}
+
+			},
+
+			update_upgrades:function() {
+				for (id in this.upgrade_def) {
+
+					if (this.buildings[this.upgrade_def[id].link].built >= (this.upgrade_def[id].start_level+((this.upgrade_def[id].current_level)*this.upgrade_def[id].increment))) {
+						$("#"+id+"_upgrade").prop('disabled', false);
+					} else {
+						$("#"+id+"_upgrade").prop('disabled', true);
+					}
 				}
 			},
 
@@ -325,21 +408,19 @@
 
 			buy_building:function(id) {
 
-				if (this.do_costs(id,true)) {
+				if (this.do_costs(this.costs[id],true)) {
 
 					this.buildings[id].built+=1;
 
+					this.update_upgrades();
 					this.update_counts();
 					this.update_gains();
 					this.update_costs();
 				}
-
 				
 			},
 
-			do_costs:function(id,commit) {
-				
-				var costs=this.costs[id];
+			do_costs:function(costs,commit) {
 
 				var check=true;
 				for (var k in costs) {
@@ -364,6 +445,11 @@
 					$("#"+id+"_level").text(this.fn(this.buildings[id].built));
 				}
 
+				for (var id in this.upgrade_def) {
+					$("#"+id+"_upgrade_level").text(this.fn(this.upgrade_def[id].current_level));
+					$("#"+id+"_multi").text(this.fn(this.upgrade_def[id].current_level+1));
+				}
+
 			},
 
 			update_gains:function() {
@@ -373,23 +459,29 @@
 				// step 1, cps/multi per building
 				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
 				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
+				$("#gold_mine_cps_post").text((this.buildings.gold_mine.cps*(this.upgrade_def.mining.current_level+1)));
 				this.buildings.gold_tower["cps"]=this.buildings.gold_tower.built*60;
 				$("#gold_tower_cps").text(this.buildings.gold_tower.cps);
+				$("#gold_tower_cps_post").text((this.buildings.gold_tower.cps*(this.upgrade_def.towering.current_level+1)));
 
-				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*1;
+				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*2;
 				$("#research_lab_cps").text(this.buildings.research_lab.cps);
+				$("#research_lab_cps_post").text((this.buildings.research_lab.cps*(this.upgrade_def.research.current_level+1)));
 
 				this.buildings.kung_fu_academy["cps"]=this.buildings.kung_fu_academy.built*3;
 				$("#kung_fu_academy_cps").text(this.buildings.kung_fu_academy.cps);
+				$("#kung_fu_academy_cps_post").text((this.buildings.kung_fu_academy.cps*(this.upgrade_def.kungfu.current_level+1)));
 
 				// step 2, apply in order
-				var gold_cps=this.buildings.gold_mine.cps;
+				var gold_cps=(this.buildings.gold_mine.cps*(this.upgrade_def.mining.current_level+1));
+				gold_cps+=(this.buildings.gold_tower.cps*(this.upgrade_def.towering.current_level+1));
 				this.resource_gains.gold=gold_cps;
 
-				var resource_cps=this.buildings.research_lab.cps;
+				var resource_cps=this.buildings.research_lab.cps*(this.upgrade_def.research.current_level+1);
+				gold_cps=gold_cps*this.upgrade_def.mining.current_level+1;
 				this.resource_gains.research=resource_cps;
 
-				var dps=this.buildings.kung_fu_academy.cps;
+				var dps=this.buildings.kung_fu_academy.cps*(this.upgrade_def.kungfu.current_level+1);
 				this.resources.dps=dps;
 			},
 
@@ -403,13 +495,30 @@
 						if (b == 1) {
 							cout[this.buildings[id].costs[cost_id][0]]=this.buildings[id].costs[cost_id][1]; // very first one is base cost (a little cheaper)
 						} else {
-							cout[this.buildings[id].costs[cost_id][0]]=this.buildings[id].costs[cost_id][1]+(this.buildings[id].costs[cost_id][2]*(b*b));
+							cout[this.buildings[id].costs[cost_id][0]]=(this.buildings[id].costs[cost_id][1]*b*0.5)+(this.buildings[id].costs[cost_id][2]*(b*b));
 						}
 
 					}
 
 					this.costs[id]=cout;
 					$("#"+id+"_nextcost").text(this.cost_string(id));
+				}
+
+				for (var id in this.upgrade_def) {
+					var cout={};
+					var b=this.upgrade_def[id].current_level+1;
+					for (var cost_id in this.upgrade_def[id].costs) {
+
+						if (b == 1) {
+							cout[this.upgrade_def[id].costs[cost_id][0]]=this.upgrade_def[id].costs[cost_id][1]; // very first one is base cost (a little cheaper)
+						} else {
+							cout[this.upgrade_def[id].costs[cost_id][0]]=(this.upgrade_def[id].costs[cost_id][1]*b*0.5)+(this.upgrade_def[id].costs[cost_id][2]*(b*b));
+						}
+
+					}
+
+					this.upgrade_costs[id]=cout;
+					$("#"+id+"_nextcost").text(this.upgrade_cost_string(id));
 				}
 
 			},
@@ -438,15 +547,22 @@
 
 			},
 
+			upgrade_cost_string:function(id) {
+
+				var out="";
+				for (var cost_id in this.upgrade_def[id].costs) {
+					out+=this.resource_def[this.upgrade_def[id].costs[cost_id][0]].name+" "+this.fn(this.upgrade_costs[id][this.upgrade_def[id].costs[cost_id][0]])+", ";
+				}
+
+				return out.slice(0,-2);
+
+			},
+
 			cost_string:function(id) {
 
 				var out="";
 				for (var cost_id in this.buildings[id].costs) {
-					if (out=="") {
-						out=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
-					} else {
-						out+=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
-					}
+					out+=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
 				}
 
 				return out.slice(0,-2);
