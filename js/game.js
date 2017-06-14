@@ -115,7 +115,7 @@ var game = {
 			current_level:0,
 			costs:[
 				['gold',500,5],
-				['research',300,6]
+				['research',100,6]
 			]
 		},
 		towering:{
@@ -231,7 +231,7 @@ var game = {
 		var boss=((power_level%10)==0);
 
 		if (boss) {
-			this.current_enemy.name=strings.enemy_prefixes[Math.floor(Math.random() * strings.enemy_prefixes.length)] + " " + strings.boss_nouns[Math.floor(Math.random() * strings.boss_nouns.length)] + " the " + this.enemy_prefixes[Math.floor(Math.random() * this.enemy_prefixes.length)];
+			this.current_enemy.name=strings.enemy_prefixes[Math.floor(Math.random() * strings.enemy_prefixes.length)] + " " + strings.boss_nouns[Math.floor(Math.random() * strings.boss_nouns.length)] + " the " + strings.enemy_prefixes[Math.floor(Math.random() * strings.enemy_prefixes.length)];
 
 			this.current_enemy.hp_max=(power_level*power_level*6)+(2000*power_level*0.5);
 		} else { 
@@ -336,8 +336,6 @@ var game = {
 	},
 
 	do_upgrade:function(id) {
-		console.log(id);
-
 		if (this.do_costs(this.upgrade_costs[id],true)) {
 
 			this.upgrades[id]+=1;
@@ -499,7 +497,8 @@ var game = {
 				if (b == 1) {
 					cout[this.upgrade_def[id].costs[cost_id][0]]=this.upgrade_def[id].costs[cost_id][1]; // very first one is base cost (a little cheaper)
 				} else {
-					cout[this.upgrade_def[id].costs[cost_id][0]]=(this.upgrade_def[id].costs[cost_id][1]*b*0.5)+(this.upgrade_def[id].costs[cost_id][2]*(b*b*10));
+					var c = b*10;
+					cout[this.upgrade_def[id].costs[cost_id][0]]=(this.upgrade_def[id].costs[cost_id][1]*c*0.5)+(this.upgrade_def[id].costs[cost_id][2]*(c*c));
 				}
 
 			}
