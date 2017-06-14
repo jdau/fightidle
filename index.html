@@ -96,16 +96,18 @@
 
 		var game = {
 
-			enemy_prefixes:['Bronze','Iron','Steel','Silver','Gold','Platinum','Meteoric','Strange','Weird','Swag','Snow','Snowy','Shivering','Boreal','Fiery','Smoldering','Smoking','Flaming','Condensing','Static','Glowing','Buzzing','Arcing','Shocking','Septic','Foul','Corrosive','Toxic','Pestilent','Jagged','Deadly','Vicious','Brutal','Massive','Savage','Merciless','Ferocious','Cruel','Lunar','Arcadian','Unearthly','Astral','Elysian','Ghostly','Celestial','Consecrated','Pure','Sacred','Hallowed','Divine','Sturdy','Strong','Glorious','Blessed','Saintly','Holy','Awakened','Speaking','Dire','Stoned','Tripping','Fucked Up','Super Ugly','Drunk','Twerking','Sexy'],
+			// saved with savegames in order to keep track of versions:
+			VERSION:"0.0.1", // invalidates saves on change!
+
+			// Static (not saved):
+			enemy_prefixes:['Bronze','Iron','Steel','Silver','Gold','Platinum','Meteoric','Strange','Weird','Swag','Snow','Snowy','Shivering','Boreal','Fiery','Smoldering','Smoking','Flaming','Condensing','Static','Glowing','Buzzing','Arcing','Shocking','Septic','Foul','Corrosive','Toxic','Pestilent','Jagged','Deadly','Vicious','Brutal','Massive','Savage','Merciless','Ferocious','Cruel','Lunar','Arcadian','Unearthly','Astral','Elysian','Ghostly','Celestial','Consecrated','Pure','Sacred','Hallowed','Divine','Sturdy','Strong','Glorious','Blessed','Saintly','Holy','Awakened','Speaking','Dire','Stoned','Tripping','Fucked Up','Super Ugly','Drunk','Twerking','Sexy','Angry','Cranky','Panicking','Immoral','Depressed','Esteemed','Annoying','Adulterous','Innocent','Pacifist','Cheesy','Comedian','Adept','Expert','Well-Cooked','Feminist','Conservative','Left-Wing','Anarchist','Punk','Biker','Rude Boy','Troll','Distracted','Wealthy','Displeased','Mad','Award-Winning','Vulgar','Champion'],
 
 			enemy_nouns:['Frog','Sea Horse','Shrub','Baboon','Badger','Bat','Cat','Crab','Claw','Detached Hand','Deer','Eagle','Beetle','Goat','Hawk','Homunculus','Hyena','Lizard','Octopus','Owl','Rat','Scorpion','Spider','Vulture','Boggle','Camel','Dolphin','Snake','Kobold','Merfolk','Mermaid','Stirge','Xvart','Blink Dog','Boar','Cow','Dretch','Drow','Flying Sword','Gnoll','Goblin','Kenku','Kuo-toa','Mephit','Blight','Panther','Pixie','Skeleton','Sprite','Troglodyte','Velociraptor','Wolf','Zombie','Cockatrice','Crocodile','Darkling','Darkmantle','Gazer','Hobgoblin','Lizardfolk','Slith','Nephilim','Orc','Uruk','Piercer','Reef Shark','Rust Monster','Satyr','Worg','Animated Armour','Harpy','Imp','Lion','Tiger','Tree','Gelatinous Cube','Ghast','Griffon','Ogre','Drake','Mummy','Daddy'],
 
 			boss_nouns:['Dragon','Wyrm','Shoggoth','Old One','Tarrasque','King','Death Knight','Lich','Pit Fiend','Overlord','Emperor'],
 
-			buildings:{
+			building_def:{
 				gold_mine:{
-					id:1,
-					built:0,
 					category:"economic",
 					name:"Gold Mine",
 					tooltip:"Extract gold from its earthly mantle to power your engine of pain.",
@@ -116,8 +118,6 @@
 					]
 				},
 				gold_tower:{
-					id:6,
-					built:0,
 					category:"economic",
 					name:"Gold Tower",
 					tooltip:"A gold mine at the top of a tower, which makes it more powerful.",
@@ -128,8 +128,6 @@
 					]
 				},
 				water_mill:{
-					id:2,
-					built:0,
 					category:"economic",
 					name:"Water Mill",
 					tooltip:"Generate electricity with the latest technologies.",
@@ -140,8 +138,6 @@
 					]
 				},
 				research_lab:{
-					id:3,
-					built:0,
 					category:"research",
 					name:"Research Lab",
 					tooltip:"These buildings find things out for you.",
@@ -152,8 +148,6 @@
 					]
 				},
 				kung_fu_academy:{
-					id:4,
-					built:0,
 					category:"combat",
 					name:"Kung-Fu Academy",
 					tooltip:"Punch and kick better with more academies.",
@@ -161,12 +155,10 @@
 					cps_suffix:" dps",
 					costs:[
 						['gold',500,3.5],
-						['research',200,4]
+						['research',100,4]
 					]
 				},
 				power_armour:{
-					id:5,
-					built:0,
 					category:"combat",
 					name:"Power Armour",
 					tooltip:"Harness U power to provide a combat strength multiplier.",
@@ -266,12 +258,10 @@
 				},
 			},
 
-			costs: {},
-			upgrade_costs: {},
+			// game state (save):
+			upgrades: {},
+			buildings: {},
 			resources: {},
-			resource_gains: {},
-
-			last_tick:0,
 
 			monsters_killed:0,
 
@@ -279,6 +269,19 @@
 				name:'',
 				hp:0,
 				hp_max:0
+			},
+
+			// cache (don't save, regenerated on load):
+			costs: {},
+			upgrade_costs: {},
+			resource_gains: {},
+			static_gains: {},
+
+			last_tick:0,
+
+
+			save_game: function() {
+
 			},
 
 			create_enemy:function() {
@@ -298,7 +301,7 @@
 
 				this.current_enemy.hp=this.current_enemy.hp_max;
 				$("#enemy_display").text(this.current_enemy.name+" ("+power_level+")");
-				$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.monsters_killed+1)*4+")");
+				$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(Math.pow(this.monsters_killed+1,4))+")");
 
 			},
 
@@ -311,7 +314,7 @@
 
 				this.current_enemy.hp-=this.resources.dps;
 
-				this.current_enemy.hp+=(this.monsters_killed+1)*4;
+				this.current_enemy.hp+=Math.pow(this.monsters_killed+1,4);
 
 				if (this.current_enemy.hp > this.current_enemy.hp_max) { this.current_enemy.hp=this.current_enemy.hp_max; }
 
@@ -320,20 +323,20 @@
 			},
 
 			create_buttons: function() {
-				for (var id in this.buildings) {
+				for (var id in this.building_def) {
 
 					var target="#economy_tab";
-					if (this.buildings[id].category=="research") {
+					if (this.building_def[id].category=="research") {
 						target="#research_tab";
-					} else if (this.buildings[id].category=="combat") {
+					} else if (this.building_def[id].category=="combat") {
 						target="#combat_tab";
 					}
 
 					$(target).append('<li>'+
-						'<button id="'+id+'_building" nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.buildings[id].tooltip+'">'+
-							'<strong>'+this.buildings[id].name+'</strong><br />'+
+						'<button id="'+id+'_building" nid="'+id+'" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="'+this.building_def[id].tooltip+'">'+
+							'<strong>'+this.building_def[id].name+'</strong><br />'+
 							'Level <span id="'+id+'_level">0</span><br />'+
-							this.buildings[id].cps_prefix+'<span id="'+id+'_cps">0</span>'+this.buildings[id].cps_suffix+' (<span id="'+id+'_cps_post">0</span>)<br />'+
+							this.building_def[id].cps_prefix+'<span id="'+id+'_cps">0</span>'+this.building_def[id].cps_suffix+' (<span id="'+id+'_cps_post">0</span>)<br />'+
 							'<span id="'+id+'_nextcost">0</span>'+
 						'</button>'+
 					'</li>');					
@@ -352,7 +355,7 @@
 			},
 
 			button_handlers:function () {
-				for (var id in this.buildings) {
+				for (var id in this.building_def) {
 					$("#"+id+"_building").click(function() {
 						game.buy_building($(this).attr("nid"));
 					});
@@ -370,7 +373,7 @@
 
 				if (this.do_costs(this.upgrade_costs[id],true)) {
 
-					this.upgrade_def[id].current_level+=1;
+					this.upgrades[id]+=1;
 
 					this.update_upgrades();
 					this.update_counts();
@@ -383,7 +386,7 @@
 			update_upgrades:function() {
 				for (id in this.upgrade_def) {
 
-					if (this.buildings[this.upgrade_def[id].link].built >= (this.upgrade_def[id].start_level+((this.upgrade_def[id].current_level)*this.upgrade_def[id].increment))) {
+					if (this.buildings[this.upgrade_def[id].link] >= (this.upgrade_def[id].start_level+((this.upgrades[id])*this.upgrade_def[id].increment))) {
 						$("#"+id+"_upgrade").prop('disabled', false);
 					} else {
 						$("#"+id+"_upgrade").prop('disabled', true);
@@ -391,7 +394,7 @@
 				}
 			},
 
-			resource_init:function() {
+			init_state:function() {
 				for (var id in this.resource_def) {
 					// init quantity storage
 					this.resources[id]=0;
@@ -408,13 +411,25 @@
 						}	
 					}
 				}
+
+				for (var id in this.building_def) {
+					this.buildings[id]=0;
+
+					this.static_gains[id]=0; // stores cps (creation per second) for buildings
+				}
+
+				for (var id in this.upgrade_def) {
+					this.upgrades[id]=0;
+				}
+
+
 			},
 
 			buy_building:function(id) {
 
 				if (this.do_costs(this.costs[id],true)) {
 
-					this.buildings[id].built+=1;
+					this.buildings[id]+=1;
 
 					this.update_upgrades();
 					this.update_counts();
@@ -445,13 +460,13 @@
 
 			update_counts:function() {
 
-				for (var id in this.buildings) {
-					$("#"+id+"_level").text(this.fn(this.buildings[id].built));
+				for (var id in this.building_def) {
+					$("#"+id+"_level").text(this.fn(this.buildings[id]));
 				}
 
 				for (var id in this.upgrade_def) {
-					$("#"+id+"_upgrade_level").text(this.fn(this.upgrade_def[id].current_level));
-					$("#"+id+"_multi").text(this.fn(this.upgrade_def[id].current_level+1));
+					$("#"+id+"_upgrade_level").text(this.fn(this.upgrades[id]));
+					$("#"+id+"_multi").text(this.fn(this.upgrades[id]+1));
 				}
 
 			},
@@ -461,45 +476,46 @@
 				// Explicit references to buildings allowed here
 
 				// step 1, cps/multi per building
-				this.buildings.gold_mine["cps"]=this.buildings.gold_mine.built*5;
-				$("#gold_mine_cps").text(this.buildings.gold_mine.cps);
-				$("#gold_mine_cps_post").text((this.buildings.gold_mine.cps*(this.upgrade_def.mining.current_level+1)));
-				this.buildings.gold_tower["cps"]=this.buildings.gold_tower.built*60;
-				$("#gold_tower_cps").text(this.buildings.gold_tower.cps);
-				$("#gold_tower_cps_post").text((this.buildings.gold_tower.cps*(this.upgrade_def.towering.current_level+1)));
+				this.static_gains.gold_mine=this.buildings.gold_mine*50;
+				$("#gold_mine_cps").text(this.static_gains.gold_mine);
+				$("#gold_mine_cps_post").text((this.static_gains.gold_mine*(this.upgrades.mining+1)));
 
-				this.buildings.research_lab["cps"]=this.buildings.research_lab.built*2;
-				$("#research_lab_cps").text(this.buildings.research_lab.cps);
-				$("#research_lab_cps_post").text((this.buildings.research_lab.cps*(this.upgrade_def.research.current_level+1)));
+				this.static_gains.gold_tower=this.buildings.gold_tower*60;
+				$("#gold_tower_cps").text(this.static_gains.gold_tower);
+				$("#gold_tower_cps_post").text((this.static_gains.gold_tower*(this.upgrades.towering+1)));
 
-				this.buildings.kung_fu_academy["cps"]=this.buildings.kung_fu_academy.built*3;
-				$("#kung_fu_academy_cps").text(this.buildings.kung_fu_academy.cps);
-				$("#kung_fu_academy_cps_post").text((this.buildings.kung_fu_academy.cps*(this.upgrade_def.kungfu.current_level+1)));
+				this.static_gains.research_lab=this.buildings.research_lab*1;
+				$("#research_lab_cps").text(this.static_gains.research_lab);
+				$("#research_lab_cps_post").text((this.static_gains.research_lab*(this.upgrades.research+1)));
+
+				this.static_gains.kung_fu_academy=this.buildings.kung_fu_academy*3;
+				$("#kung_fu_academy_cps").text(this.static_gains.kung_fu_academy);
+				$("#kung_fu_academy_cps_post").text((this.static_gains.kung_fu_academy*(this.upgrades.kungfu+1)));
 
 				// step 2, apply in order
-				var gold_cps=(this.buildings.gold_mine.cps*(this.upgrade_def.mining.current_level+1));
-				gold_cps+=(this.buildings.gold_tower.cps*(this.upgrade_def.towering.current_level+1));
+				var gold_cps=(this.static_gains.gold_mine*(this.upgrades.mining+1));
+				gold_cps+=(this.static_gains.gold_tower*(this.upgrades.towering+1));
 				this.resource_gains.gold=gold_cps;
 
-				var resource_cps=this.buildings.research_lab.cps*(this.upgrade_def.research.current_level+1);
-				gold_cps=gold_cps*this.upgrade_def.mining.current_level+1;
+				var resource_cps=this.static_gains.research_lab*(this.upgrades.research+1);
+				gold_cps=gold_cps*this.upgrades.mining+1;
 				this.resource_gains.research=resource_cps;
 
-				var dps=this.buildings.kung_fu_academy.cps*(this.upgrade_def.kungfu.current_level+1);
+				var dps=this.static_gains.kung_fu_academy*(this.upgrades.kungfu+1);
 				this.resources.dps=dps;
 			},
 
 			update_costs:function() {
 
-				for (var id in this.buildings) {
+				for (var id in this.building_def) {
 					var cout={};
-					var b=this.buildings[id].built+1;
-					for (var cost_id in this.buildings[id].costs) {
+					var b=this.buildings[id]+1;
+					for (var cost_id in this.building_def[id].costs) {
 
 						if (b == 1) {
-							cout[this.buildings[id].costs[cost_id][0]]=this.buildings[id].costs[cost_id][1]; // very first one is base cost (a little cheaper)
+							cout[this.building_def[id].costs[cost_id][0]]=this.building_def[id].costs[cost_id][1]; // very first one is base cost (a little cheaper)
 						} else {
-							cout[this.buildings[id].costs[cost_id][0]]=(this.buildings[id].costs[cost_id][1]*b*0.5)+(this.buildings[id].costs[cost_id][2]*(b*b));
+							cout[this.building_def[id].costs[cost_id][0]]=(this.building_def[id].costs[cost_id][1]*b*0.5)+(this.building_def[id].costs[cost_id][2]*(b*b));
 						}
 
 					}
@@ -565,8 +581,8 @@
 			cost_string:function(id) {
 
 				var out="";
-				for (var cost_id in this.buildings[id].costs) {
-					out+=this.resource_def[this.buildings[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.buildings[id].costs[cost_id][0]])+", ";
+				for (var cost_id in this.building_def[id].costs) {
+					out+=this.resource_def[this.building_def[id].costs[cost_id][0]].name+" "+this.fn(this.costs[id][this.building_def[id].costs[cost_id][0]])+", ";
 				}
 
 				return out.slice(0,-2);
@@ -608,7 +624,7 @@
 				});
 
 				// Game init
-				this.resource_init();
+				this.init_state();
 				this.create_buttons();
 				this.button_handlers();
 
@@ -623,8 +639,6 @@
 				this.update_costs();
 				this.game_loop();
 			}
-
-
 
 		};
 
