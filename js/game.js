@@ -12,7 +12,7 @@ var game = {
 			cps_prefix:"",
 			cps_suffix:" g / second",
 			costs:[
-				['gold',50,3.2]
+				['gold',50,4.2]
 			]
 		},
 		gold_tower:{
@@ -22,7 +22,7 @@ var game = {
 			cps_prefix:"",
 			cps_suffix:" g / second",
 			costs:[
-				['gold',10000,3]
+				['gold',100000,4]
 			]
 		},
 		water_mill:{
@@ -126,7 +126,7 @@ var game = {
 			increment:10,
 			current_level:0,
 			costs:[
-				['gold',4000,5],
+				['gold',40000,5],
 				['research',300,6]
 			]
 		},
@@ -247,7 +247,7 @@ var game = {
 	display_enemy:function() {
 		var power_level=this.monsters_killed+1;
 		$("#enemy_display").text(this.current_enemy.name+" ("+this.fn(power_level)+")");
-		$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,1.8))))+")");
+		$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,1.9))))+")");
 	},
 
 	do_damage:function() {
@@ -263,7 +263,7 @@ var game = {
 
 		this.current_enemy.hp-=this.resources.dps;
 
-		this.current_enemy.hp+=Math.floor(Math.pow(this.monsters_killed+1,1.8));
+		this.current_enemy.hp+=Math.floor(Math.pow(this.monsters_killed+1,1.9));
 
 		if (this.current_enemy.hp > this.current_enemy.hp_max) { this.current_enemy.hp=this.current_enemy.hp_max; }
 
@@ -459,7 +459,7 @@ var game = {
 		$("#gold_mine_cps").text(this.fn(this.static_gains.gold_mine));
 		$("#gold_mine_cps_post").text(this.fn(this.static_gains.gold_mine*(this.upgrades.mining+1)));
 
-		this.static_gains.gold_tower=this.buildings.gold_tower*60;
+		this.static_gains.gold_tower=this.buildings.gold_tower*80;
 		$("#gold_tower_cps").text(this.fn(this.static_gains.gold_tower));
 		$("#gold_tower_cps_post").text(this.fn(this.static_gains.gold_tower*(this.upgrades.towering+1)));
 
