@@ -181,6 +181,7 @@ var game = {
 	save_game: function() {
 
 		var save_data={
+			v:this.VERSION,
 			u:this.upgrades,
 			b:this.buildings,
 			r:this.resources,
@@ -192,16 +193,26 @@ var game = {
 
 		console.log("Saved!");
 
-		localStorage.setItem('save2',saveString);
+		localStorage.setItem('save',saveString);
 	},
 
 	load_game: function() {
-		var lData=localStorage.getItem('save2');
+		var lData=localStorage.getItem('save');
 
-		if (!lData) { return false; }
+		if (!lData || lData=="del") { return false; }
 
 		var dcData=JSON.parse(base64_decode(lData));
 		console.log("Game loaded");
+
+		if (dcData.v!=this.VERSION) {
+			$( "#dialog-oldsave" ).dialog({
+				modal: true,
+				buttons: {
+					"Fuck off": function() { $( this ).dialog( "close" ); }
+				}
+			});
+			return false;
+		}
 
 		this.upgrades=dcData.u;
 		this.buildings=dcData.b;
@@ -299,7 +310,29 @@ var game = {
 			$("#"+id+"_upgrade").click(function() {
 				game.do_upgrade($(this).attr("nid"));
 			});
-		}				
+		}
+
+		$("#save_game").click(function() {
+			game.save_game();
+		});
+
+		$("#delete_game").click(function() {
+			$( "#dialog-confirm" ).dialog({
+				resizable: false,
+				height: "auto",
+				width: 400,
+				modal: true,
+				buttons: {
+					"DO IT": function() {
+						localStorage.setItem('save','del');
+						location.reload();
+					},
+					"Let me rethink": function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			});
+		});
 	},
 
 	do_upgrade:function(id) {
@@ -542,15 +575,12 @@ var game = {
 
 	save_loop:function() {
 		game.save_game();
-		window.setTimeout(game.save_loop,60000);
+		window.setTimeout(game.save_loop,20000);
 	},
 
 	init:function() {
 		// Library stuff
-		$( "#building_tabs" ).tabs({
-
-		});
-
+		$( "#building_tabs" ).tabs();
 		$( "#status_tabs" ).tabs();
 
 		$(document).tooltip({
@@ -581,7 +611,7 @@ var game = {
 		this.update_costs();
 		this.game_loop();
 
-		window.setTimeout(game.save_loop,6000); // 60 seconds
+		window.setTimeout(game.save_loop,20000); // 60 seconds
 	}
 
 };

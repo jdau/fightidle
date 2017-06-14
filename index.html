@@ -36,6 +36,12 @@
 			letter-spacing: normal;
 		}
 
+		.ui-dialog .ui-dialog-buttonpane button {
+			height: 65px;
+			width: auto;
+			padding: 0px 10px;
+		}
+
 		.ui-button:disabled {
 			color: #000;
 		}
@@ -93,16 +99,9 @@
 	<script src="js/game.js"></script>
 
 	<script>
-
 		$( function() {
 			game.init();
-
-			console.log(localStorage);
 		} );
-
-		
-
-		
 	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png">
@@ -179,14 +178,28 @@
 						&nbsp;
 					</div>
 					<div id="status_tabs-2">
-						<p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+						<ul class="building_buttons">
+							<li>
+								<button id="save_game" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="">Save game (autosaving every 20 seconds)</button>
+							</li>
+							<li>
+								<button id="delete_game" class="desc_tooltip twelve columns ui-button ui-widget ui-corner-all" tip="">Delete save game</button>
+							</li>
+						</ul>
+						&nbsp;
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-<!-- End Document
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+	<div id="dialog-confirm" title="Save game wipe" style="display:none;">
+		<p>Delete your save and reload the game. Saves cannot be recovered if you do this.</p>
+	</div>
+
+	<div id="dialog-oldsave" title="Old save data" style="display:none;">
+		<p>Your save data is incompatible with the latest version and has been wiped. I'm sorry, it's a pre-alpha.</p>
+	</div>
+
 </body>
 </html>
