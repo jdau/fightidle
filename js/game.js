@@ -256,7 +256,7 @@ var game = {
 
 			this.resources.gold+=this.current_enemy.hp_max*10;
 			this.resources.research+=this.current_enemy.hp_max*2;
-			
+
 			this.monsters_killed+=1;
 			this.create_enemy();
 		}
@@ -395,6 +395,16 @@ var game = {
 	},
 
 	buy_building:function(id) {
+
+		if (id=='water_mill') {
+			$( "#dialog-watermill" ).dialog({
+				modal: true,
+				buttons: {
+					"Sounds about right": function() { $( this ).dialog( "close" ); }
+				}
+			});
+			return false;
+		}
 
 		if (this.do_costs(this.costs[id],true)) {
 
