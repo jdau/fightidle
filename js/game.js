@@ -247,7 +247,7 @@ var game = {
 	display_enemy:function() {
 		var power_level=this.monsters_killed+1;
 		$("#enemy_display").text(this.current_enemy.name+" ("+this.fn(power_level)+")");
-		$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,1.9))))+")");
+		$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,2.2))))+")");
 	},
 
 	do_damage:function() {
@@ -263,7 +263,7 @@ var game = {
 
 		this.current_enemy.hp-=this.resources.dps;
 
-		this.current_enemy.hp+=Math.floor(Math.pow(this.monsters_killed+1,1.9));
+		this.current_enemy.hp+=Math.floor(Math.pow(this.monsters_killed+1,2.2));
 
 		if (this.current_enemy.hp > this.current_enemy.hp_max) { this.current_enemy.hp=this.current_enemy.hp_max; }
 
