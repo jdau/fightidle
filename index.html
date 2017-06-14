@@ -300,8 +300,8 @@
 				}
 
 				this.current_enemy.hp=this.current_enemy.hp_max;
-				$("#enemy_display").text(this.current_enemy.name+" ("+power_level+")");
-				$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(Math.pow(this.monsters_killed+1,4))+")");
+				$("#enemy_display").text(this.current_enemy.name+" ("+this.fn(power_level)+")");
+				$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,1.5))))+")");
 
 			},
 
@@ -314,12 +314,12 @@
 
 				this.current_enemy.hp-=this.resources.dps;
 
-				this.current_enemy.hp+=Math.pow(this.monsters_killed+1,4);
+				this.current_enemy.hp+=Math.floor(Math.pow(this.monsters_killed+1,1.5));
 
 				if (this.current_enemy.hp > this.current_enemy.hp_max) { this.current_enemy.hp=this.current_enemy.hp_max; }
 
 				$("#health_bar").css('width',((this.current_enemy.hp/this.current_enemy.hp_max)*100)+"%");
-				$("#enemy_hp").text(this.current_enemy.hp);
+				$("#enemy_hp").text(this.fn(this.current_enemy.hp));
 			},
 
 			create_buttons: function() {
@@ -477,20 +477,20 @@
 
 				// step 1, cps/multi per building
 				this.static_gains.gold_mine=this.buildings.gold_mine*50;
-				$("#gold_mine_cps").text(this.static_gains.gold_mine);
-				$("#gold_mine_cps_post").text((this.static_gains.gold_mine*(this.upgrades.mining+1)));
+				$("#gold_mine_cps").text(this.fn(this.static_gains.gold_mine));
+				$("#gold_mine_cps_post").text(this.fn(this.static_gains.gold_mine*(this.upgrades.mining+1)));
 
 				this.static_gains.gold_tower=this.buildings.gold_tower*60;
-				$("#gold_tower_cps").text(this.static_gains.gold_tower);
-				$("#gold_tower_cps_post").text((this.static_gains.gold_tower*(this.upgrades.towering+1)));
+				$("#gold_tower_cps").text(this.fn(this.static_gains.gold_tower));
+				$("#gold_tower_cps_post").text(this.fn(this.static_gains.gold_tower*(this.upgrades.towering+1)));
 
-				this.static_gains.research_lab=this.buildings.research_lab*1;
-				$("#research_lab_cps").text(this.static_gains.research_lab);
-				$("#research_lab_cps_post").text((this.static_gains.research_lab*(this.upgrades.research+1)));
+				this.static_gains.research_lab=this.buildings.research_lab*10;
+				$("#research_lab_cps").text(this.fn(this.static_gains.research_lab));
+				$("#research_lab_cps_post").text(this.fn(this.static_gains.research_lab*(this.upgrades.research+1)));
 
 				this.static_gains.kung_fu_academy=this.buildings.kung_fu_academy*3;
-				$("#kung_fu_academy_cps").text(this.static_gains.kung_fu_academy);
-				$("#kung_fu_academy_cps_post").text((this.static_gains.kung_fu_academy*(this.upgrades.kungfu+1)));
+				$("#kung_fu_academy_cps").text(this.fn(this.static_gains.kung_fu_academy));
+				$("#kung_fu_academy_cps_post").text(this.fn(this.static_gains.kung_fu_academy*(this.upgrades.kungfu+1)));
 
 				// step 2, apply in order
 				var gold_cps=(this.static_gains.gold_mine*(this.upgrades.mining+1));
@@ -526,7 +526,7 @@
 
 				for (var id in this.upgrade_def) {
 					var cout={};
-					var b=this.upgrade_def[id].current_level+1;
+					var b=this.upgrades[id]+1;
 					for (var cost_id in this.upgrade_def[id].costs) {
 
 						if (b == 1) {
