@@ -186,10 +186,32 @@ var game = {
 			r:this.resources,
 			m:this.monsters_killed,
 			c:this.current_enemy
-		}
+		};
 
+		var saveString=base64_encode(JSON.stringify(save_data));
 
+		console.log("Saved!");
 
+		localStorage.setItem('save2',saveString);
+	},
+
+	load_game: function() {
+		var lData=localStorage.getItem('save2');
+
+		if (!lData) { return false; }
+
+		var dcData=JSON.parse(base64_decode(lData));
+		console.log("Game loaded");
+
+		this.upgrades=dcData.u;
+		this.buildings=dcData.b;
+		this.resources=dcData.r;
+		this.monsters_killed=dcData.m;
+		this.current_enemy=dcData.c;
+
+		this.display_enemy();
+
+		return true;
 	},
 
 	create_enemy:function() {
@@ -208,9 +230,13 @@ var game = {
 		}
 
 		this.current_enemy.hp=this.current_enemy.hp_max;
+		this.display_enemy();
+	},
+
+	display_enemy:function() {
+		var power_level=this.monsters_killed+1;
 		$("#enemy_display").text(this.current_enemy.name+" ("+this.fn(power_level)+")");
 		$("#enemy_hp_max").text(this.current_enemy.hp_max + " (+"+(this.fn(Math.floor(Math.pow(this.monsters_killed+1,1.8))))+")");
-
 	},
 
 	do_damage:function() {
@@ -514,6 +540,11 @@ var game = {
 		window.setTimeout(game.game_loop,400); // the actual game_loop timeout can be adjusted freely
 	},
 
+	save_loop:function() {
+		game.save_game();
+		window.setTimeout(game.save_loop,60000);
+	},
+
 	init:function() {
 		// Library stuff
 		$( "#building_tabs" ).tabs({
@@ -537,15 +568,20 @@ var game = {
 		this.button_handlers();
 
 		// Game initial state
-		this.resources.gold=100;
+		if (!this.load_game()) {
+				this.resources.gold=100;
+				this.create_enemy();
+		}
+
 		this.last_tick=Date.now()-1000; // start one second ago, lol
 
-		this.create_enemy();
-
+		this.update_upgrades();
 		this.update_counts();
 		this.update_gains();
 		this.update_costs();
 		this.game_loop();
+
+		window.setTimeout(game.save_loop,6000); // 60 seconds
 	}
 
 };
