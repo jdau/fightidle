@@ -253,6 +253,10 @@ var game = {
 	do_damage:function() {
 
 		if (this.current_enemy.hp <= 0) { 
+
+			this.resources.gold+=this.current_enemy.hp_max*10;
+			this.resources.research+=this.current_enemy.hp_max*2;
+			
 			this.monsters_killed+=1;
 			this.create_enemy();
 		}
