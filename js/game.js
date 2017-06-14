@@ -575,7 +575,7 @@ var game = {
 
 	save_loop:function() {
 		game.save_game();
-		window.setTimeout(game.save_loop,20000);
+		window.setTimeout(game.save_loop,60000); // 1 minute
 	},
 
 	init:function() {
@@ -611,7 +611,7 @@ var game = {
 		this.update_costs();
 		this.game_loop();
 
-		window.setTimeout(game.save_loop,20000); // 60 seconds
+		window.setTimeout(game.save_loop,15000); // 15 seconds to initial save
 	}
 
 };
