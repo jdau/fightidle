@@ -12,7 +12,7 @@ var game = {
 			cps_prefix:"",
 			cps_suffix:" g / second",
 			costs:[
-				['gold',50,4.2]
+				['gold',50,7]
 			]
 		},
 		gold_tower:{
@@ -22,7 +22,7 @@ var game = {
 			cps_prefix:"",
 			cps_suffix:" g / second",
 			costs:[
-				['gold',100000,4]
+				['gold',100000,7]
 			]
 		},
 		water_mill:{
